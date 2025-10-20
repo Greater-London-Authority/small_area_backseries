@@ -3,7 +3,7 @@
 library(data.table)
 
 
-## 1. reading in the data (these were all just downloaded and put in the raw data folder. Need to add a way to read them in remotely. nomis? Put them up publicly somewhere?)
+## 1. reading in the data (these were all just downloaded and put in the raw data folder. Need to add a way to read them in remotely. nomis? Put them up publicly somewhere? Is this something we'll put up on the datastore?)
 
   ### 1.1. census flows
 int_in_m <- fread("input_data/raw/CT0496_male_international_in_to_msoa.csv",
@@ -181,9 +181,8 @@ gross_flows_lsoa <- gross_flows_lsoa[, -c("scaling_factor", "net_flows")]
 
 
   ### 4.4. splitting the flows of people within msoas, which are already allocated across lsoas, from totals to single year of age by sex
-  ### we have the number of people who have moved within the msoa in the past year, but there is no age or sex aggregation. So as well as distribute that number lsoas, we also have to distribute it across single year of age and sex! 
-  ### the question is, at what level? I think at MSOA, and then assume that the same profile exists by age at lsoa. The lower down we go, the more made up the estimates become...
-  ### also, the figure we have to distribute is at msoa level, so I suppose it makes sense the calculate the age/sex distribution at that level? 
+  ### we have the number of people who have moved within the msoa in the past year, but there is no age or sex aggregation. So as well as distribute that number lsoas, we also have to distribute it across single year of age and sex
+  ### by the lsoa-level flows by age that we have, just creating an age/sex distibution for each lsoa and using that to allocate. 
 
 gross_flows_lsoa[, all_ages_inflows := .(sum(inflow)), # calculating total inflow for lsoa, summing over age and sex
             by = .(lsoa21cd, year)] # TO-DO - after a bit of time, double check that this line is correct. I do think it is, but if it were wrong it would mess everything up a way that may not be immediately obvious. 

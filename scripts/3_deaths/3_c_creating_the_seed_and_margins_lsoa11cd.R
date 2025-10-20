@@ -1,7 +1,7 @@
 ## for creating net flows at msoa11 level for 2011, we need deaths at single year of age for msoa11. Meaning we need to do another whole run of the ipf process.
 ## going to create them at lsoa11, which will then perfectly aggregate up to msoa11. 
 ## also, we only need this for 2011 
-## basically just copied and amended scripts 3_a and 3_b. Put some work into making it more compact etc. 
+## basically just copied and amended scripts 3_a and 3_b. Put some work into making it a lot more compact etc. 
 
 ## 0. libraries and functions
 library(data.table)
@@ -15,7 +15,7 @@ lsoa_deaths <- lsoa_deaths[year == 2011, ]
 
 
 ## 2. reading in the la level mid year estimates, extracting the death components
-mye_series <- data.table(readRDS("Q:/Teams/D&PA/Data/population_estimates/gla_timeseries/gla_timeseries_2001_2021.rds"))
+mye_series <- data.table(readRDS("input_data/raw/population_estimates_gla_timeseries_2001_2024.rds"))
 
 lad_deaths <- mye_series[component == "deaths" & year == 2011, 
                          c("gss_code", "gss_name", "year", "age", "sex", "value")]

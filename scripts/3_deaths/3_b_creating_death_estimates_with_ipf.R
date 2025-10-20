@@ -27,7 +27,7 @@ lad_deaths_mar <- lad_deaths_mar[, c("lad22cd", "year", "age", "sex", "value")]
 ## 2. defining the function that will carry out the ipf (I think a new function will have to be created each time for IPF, as the seed to marginal matching is so specific. But worth looking into more, to see if this operation can be made general)
 ipf_est <- function(input_geog){
   
-    ### 2.1. narrowing down seed and marginals by geography
+    ### 2.1. narrowing down seed and margins by geography
   lsoa_seed_sel <- lsoa_seed[lad22cd == input_geog, ]
   
   lsoa_deaths_mar_sel <- lsoa_deaths_mar[lad22cd == input_geog, ]
@@ -82,7 +82,7 @@ all_geogs <- lsoa_seed[, unique(lad22cd)]
 
 fitted_ests <- list()
 
-for(i in 1:length(all_geogs)){
+for(i in 1:length(all_geogs)){ # TO DISCUSS - when I leave the 0 cells in and don't add an epsilon, sometimes it doesn't converge? Does that matter? 
   
   input_geog <- all_geogs[i]
   

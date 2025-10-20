@@ -41,7 +41,7 @@ target_net_vec <- gross_flows_all_series[, net_flows]
 
 base_in_vec[is.na(base_in_vec)] <- 0
 base_out_vec[is.na(base_out_vec)] <- 0
-target_net_vec[is.na(target_net_vec)] <- 0 # hmm.....some of the net flows turn out to be NA. Obviously something has gone wrong, so look back and figure it out - I imagine it's one of the joins. But for now, just to make things work, just make them all equal to 0. 
+target_net_vec[is.na(target_net_vec)] <- 0 # hmm.....some of the net flows turn out to be NA. Obviously something has gone wrong, so look back and figure it out. I imagine it's one of the joins. But for now, just to make things work, just make them all equal to 0. 
 
 adjusted_net_flows <- optimise_gross_flows(base_in = base_in_vec, 
                                            base_out = base_out_vec, 

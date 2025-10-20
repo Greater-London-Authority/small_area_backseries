@@ -4,7 +4,6 @@
 library(data.table)
 library(gsscoder)
 
-
 ## 1. reading in the death data, narrowing to years we need
 lsoa_deaths <- data.table(readRDS("input_data/raw/deathsbylsoamidyear01to20.rds"))
 
@@ -12,7 +11,11 @@ lsoa_deaths <- lsoa_deaths[year <= 2020 & year >= 2011, ]
 
 
 ## 2. reading in the la level mid year estimates, extracting the death components
-mye_series <- data.table(readRDS("Q:/Teams/D&PA/Data/population_estimates/gla_timeseries/gla_timeseries_2001_2021.rds")) # TO DISCUSS - where should this data go? Very big so seems awkward to keep copying it around every repo you need it in. 
+download.file("https://data.london.gov.uk/download/fb203828-bde5-4a50-96d9-8adfb4960631/ba752f34-0b54-4184-9251-8e2e94ae97ee/full_modelled_estimates_series_EW(2023_geog).rds", # should probably be done earlier, in the population folder
+              "input_data/raw/population_estimates_gla_timeseries_2001_2024.rds",
+              mode = "wb")
+
+mye_series <- data.table(readRDS("input_data/raw/population_estimates_gla_timeseries_2001_2024.rds"))
 
 lad_deaths <- mye_series[component == "deaths" & year <= 2020 & year >= 2011, 
                          c("gss_code", "gss_name", "year", "age", "sex", "value")]
@@ -161,7 +164,7 @@ lad_deaths_mar <- data.table(lad_deaths_mar)
 
   ### 5.4. scaling the lsoa figures so that the marginals add up (IPF doesn't work if the marginals give different totals)
   ### by getting the ratio difference between the two marginals by year and sex and lad22cd, and multiplying the lsoa values by these scaling factors
-  ### this will lead to decimal points in the marginal for lsoas. I think this is ok, in part because we already have decimals after estimating 2021 lsoas from 2011 lsoas. 
+  ### this will lead to decimal points in the margin for lsoas. I think this is ok, in part because we already have decimals after estimating 2021 lsoas from 2011 lsoas. 
   ### this also means that I am assuming that the local authority level mid year estimates are the "correct" estimates and that we scale the lsoa estimates to match them. This may or may not be a sound assumption, but I don't think it matters very much as the differences are very small. 
 
 lad_scale <- lad_deaths_mar[, .(deaths_lad = sum(value)),
