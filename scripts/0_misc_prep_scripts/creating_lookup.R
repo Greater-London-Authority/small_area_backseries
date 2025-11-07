@@ -4,7 +4,7 @@
 library(sf)
 library(data.table)
 
-## 1. creating 2011 output to 2021 census statistical geographies (above OA) and to 2022 local authority districts
+## 1. creating 2011 output to 2021 census statistical geographies (above OA) and to 2022 local authority districts (this is mostly the not very good oa11-lsoa21 lookup)
 
 oa_11_pwcs <- st_read("geo/OA_2011_EW_PWC.shp")
 
@@ -25,6 +25,82 @@ lookup <- lookup[,..keep]
 
 fwrite(x = lookup,
        file = "lookups/2011_oa_2022_lsoa_msoa_la.csv")
+
+
+## 2. oa11 to msoa21
+msoa_21 <- st_read("geo/MSOA_2021_EnglandWales_full_extent.shp")
+
+oa_11_pwcs <- st_transform(oa_11_pwcs, crs = 27700)
+msoa_21 <- st_transform(msoa_21, crs = 27700)
+
+oa11_msoa21_lookup <- st_join(oa_11_pwcs, msoa_21)
+oa11_msoa21_lookup <- data.table(oa11_msoa21_lookup)
+
+
+colnames(oa11_msoa21_lookup) <- tolower(colnames(oa11_msoa21_lookup))
+
+oa11_msoa21_lookup <- oa11_msoa21_lookup[, c("oa11cd", "msoa21cd")]
+
+oa11_msoa21_london_weighted <- fread("lookups/OA_2011_London_MSOA_2021_London_combine.csv")
+colnames(oa11_msoa21_london_weighted) <- tolower(colnames(oa11_msoa21_london_weighted))
+oa11_msoa21_london_weighted <- oa11_msoa21_london_weighted[, c("oa11cd", "msoa21cd", "year", "weight")]
+
+london_oas <- oa11_msoa21_london_weighted[, unique(oa11cd)]
+
+oa11_msoa21_lookup_nonlondon <- oa11_msoa21_lookup[!(oa11cd %in% london_oas), ]
+
+oa11_msoa21_lookup_nonlondon[, year := 2011]
+
+years <- 2011:2021
+
+oa11_msoa21_lookup_nonlondon <- oa11_msoa21_lookup_nonlondon[, .(year = years),
+                                     by = eval(names(oa11_msoa21_lookup_nonlondon)[names(oa11_msoa21_lookup_nonlondon) != "year"])]
+
+oa11_msoa21_lookup_nonlondon[, weight := 1]
+
+oa11_msoa21_all <- rbind(oa11_msoa21_london_weighted, oa11_msoa21_lookup_nonlondon)
+
+saveRDS(object = oa11_msoa21_all,
+        file = "lookups/oa11_msoa21_weighted.rds")
+
+
+## 3. lsoa11 to msoa21
+lsoa_11_pwcs <- st_read("geo/LSOA_2011_EW_PWC.shp")
+
+lsoa_11_pwcs <- st_transform(lsoa_11_pwcs, crs = 27700)
+msoa_21 <- st_transform(msoa_21, crs = 27700)
+
+lsoa11_msoa21_lookup <- st_join(lsoa_11_pwcs, msoa_21)
+lsoa11_msoa21_lookup <- data.table(lsoa11_msoa21_lookup)
+
+
+colnames(lsoa11_msoa21_lookup) <- tolower(colnames(lsoa11_msoa21_lookup))
+
+lsoa11_msoa21_lookup <- lsoa11_msoa21_lookup[, c("lsoa11cd", "msoa21cd")]
+
+lsoa11_msoa21_london_weighted <- fread("lookups/LSOA_2011_London_MSOA_2021_London_combined.csv")
+
+colnames(lsoa11_msoa21_london_weighted) <- tolower(colnames(lsoa11_msoa21_london_weighted))
+lsoa11_msoa21_london_weighted <- lsoa11_msoa21_london_weighted[, c("lsoa11cd", "msoa21cd", "year", "weight")]
+
+london_lsoas <- lsoa11_msoa21_london_weighted[, unique(lsoa11cd)]
+
+lsoa11_msoa21_lookup_nonlondon <- lsoa11_msoa21_lookup[!(lsoa11cd %in% london_lsoas), ]
+
+lsoa11_msoa21_lookup_nonlondon[, year := 2011]
+
+years <- 2011:2021
+
+lsoa11_msoa21_lookup_nonlondon <- lsoa11_msoa21_lookup_nonlondon[, .(year = years),
+                                                             by = eval(names(lsoa11_msoa21_lookup_nonlondon)[names(lsoa11_msoa21_lookup_nonlondon) != "year"])]
+
+lsoa11_msoa21_lookup_nonlondon[, weight := 1]
+
+lsoa11_msoa21_all <- rbind(lsoa11_msoa21_london_weighted, lsoa11_msoa21_lookup_nonlondon)
+
+saveRDS(object = lsoa11_msoa21_all,
+        file = "lookups/lsoa11_msoa21_weighted.rds")
+
 
 
 ## 2021 lsoa to 2011 msoa
