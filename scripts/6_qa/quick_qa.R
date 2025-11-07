@@ -20,7 +20,7 @@ backseries <- msoa_lad_lookup[backseries]
 
 all_lads <- backseries[, unique(lad22cd)]
 
-## 2. for a single lsoa, shiny app with charts showing deaths and net flows by age (because these are the two components that are estimated. We make minimal/no changes to births and populaTION)
+## 2. for a single lsoa, shiny app with charts showing deaths and net flows by age (because these are the two components that are estimated. We make minimal/no changes to births and population)
 ## the point is to cycle through to see if in general the results look like they make sense. Too many lsoas, never mind lsoa-year combinations, to do any sort of comprehensive sweep
 ## because performance is really slow if the entire backseries dataset is put in, the app only runs on one lad at a time
 
