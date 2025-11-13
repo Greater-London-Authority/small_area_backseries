@@ -19,7 +19,8 @@ aggregate_geographies_weighted <- function(data, lookup,
   
   setkeyv(lookup, c(geog_from_data, year_col))
   
-  data <- lookup[data]
+  data <- lookup[data,
+                 allow.cartesian = TRUE] # we want allow.cartesian = TRUE, because to split a geography over another geography, we'll need to join the same code in the data to more than one of the same code in the lookup. How did this function ever work without allowing cartesian = TRUE? 
   
   data <- data[,-..geog_from_lookup]
   

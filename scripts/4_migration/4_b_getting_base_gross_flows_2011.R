@@ -287,11 +287,11 @@ rm(list = ls())
 gc()
 
 #### bit of qa, calculating the percentage of flows that are from within the msoa. 10% ish, with a pretty wide range, is about right. Other small bits of qa too. 
-hist(gross_flows_msoa[, outflow], breaks = 1000) ## some too-large values for both inflows and outflows. But look into in more detail - may not be an issue at all
-hist(gross_flows_msoa[, inflow], breaks = 1000) ## 
+#hist(gross_flows_msoa[, outflow], breaks = 1000) ## some too-large values for both inflows and outflows. But look into in more detail - may not be an issue at all
+#hist(gross_flows_msoa[, inflow], breaks = 1000) ## 
 
-gross_flows_msoa[inflow > 1000, ] # yeah, they all seem to be 19-20 year olds in student villages. Selly Oak, Durham City, Headingley
+#gross_flows_msoa[inflow > 1000, ] # yeah, they all seem to be 19-20 year olds in student villages. Selly Oak, Durham City, Headingley
 
-gross_flows_msoa[outflow > 750, ] # Same again....places like Fallowfield, Selly Oak again, Oxford Central, etc
+#gross_flows_msoa[outflow > 750, ] # Same again....places like Fallowfield, Selly Oak again, Oxford Central, etc
 
 

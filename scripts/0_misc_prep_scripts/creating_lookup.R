@@ -4,7 +4,7 @@
 library(sf)
 library(data.table)
 
-## 1. creating 2011 output to 2021 census statistical geographies (above OA) and to 2022 local authority districts (this is mostly the not very good oa11-lsoa21 lookup)
+## 1. creating 2011 output to 2021 census statistical geographies (above OA) and to 2022 local authority districts (ended up not using a lot of these. Need to be weighted)
 
 oa_11_pwcs <- st_read("geo/OA_2011_EW_PWC.shp")
 
@@ -42,6 +42,7 @@ colnames(oa11_msoa21_lookup) <- tolower(colnames(oa11_msoa21_lookup))
 oa11_msoa21_lookup <- oa11_msoa21_lookup[, c("oa11cd", "msoa21cd")]
 
 oa11_msoa21_london_weighted <- fread("lookups/OA_2011_London_MSOA_2021_London_combine.csv")
+
 colnames(oa11_msoa21_london_weighted) <- tolower(colnames(oa11_msoa21_london_weighted))
 oa11_msoa21_london_weighted <- oa11_msoa21_london_weighted[, c("oa11cd", "msoa21cd", "year", "weight")]
 
@@ -103,7 +104,7 @@ saveRDS(object = lsoa11_msoa21_all,
 
 
 
-## 2021 lsoa to 2011 msoa
+## 4. 2021 lsoa to 2011 msoa
 
 lsoa_21_centroids <- st_read("geo/lsoa_21_pwcs.gpkg")
 
@@ -123,5 +124,4 @@ colnames(lsoa21_msoa11_lookup) <- c("msoa11cd", "lsoa21cd")
 
 fwrite(x = lsoa21_msoa11_lookup,
       file = "lookups/2021_lsoa_2011_msoa.csv")
-
 
