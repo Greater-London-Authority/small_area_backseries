@@ -26,22 +26,27 @@ deaths_24 <- readRDS("input_data/intermediate/fitted_lsoa21_deaths.rds")
 births <- readRDS("input_data/intermediate/births_2001_2024_oa21.rds")
 
 
-### 1.2. lookups
+  ### 1.2. lookups
 lsoa11_ward22_weighted <- readRDS("lookups/lsoa11_ward22_weighted_extended.rds")
 
 lsoa21_ward22 <- readRDS("lookups/lsoa21_ward22_bf.rds")
 
 oa21_ward22 <- readRDS("lookups/oa21_ward22_bf.rds")
 
+all_missing_wards <- readRDS("lookups/ward22_missing.rds") # this should be a feature in the lookup. To do. 
+
 
 ## 2. aggregating all geographies to ward22cd and to common age categories
 
-### 2.1. population (already at ward)
+  ### 2.1. population (already at ward)
 population <- population[year <= max_year, -"ward22nm"]
 
-population <- aggregate_to_lower_max_age(input_data = population, new_max_age = 85, count_names = "population")
+population[ward22cd %in% all_missing_wards, ward22cd := "unmatched"]
 
-### 2.2. deaths
+population <- population[, .(population = sum(population)),
+                         by = list(year, ward22cd, age, sex)]
+
+  ### 2.2. deaths
 deaths <- aggregate_geographies_weighted(data = deaths[year >= min_year, ], lookup = lsoa11_ward22_weighted,
                                          geog_from_data = "lsoa11cd", geog_from_lookup = "lsoa11cd",
                                          geog_to_lookup = "ward22cd", count_name = "deaths")
@@ -57,7 +62,7 @@ if(max_year >= 2024){
   
 }
 
-### 2.3. births
+  ### 2.3. births
 births <- births[year >= min_year & year <= max_year, ]
 
 births <- aggregate_geographies_2(data = births, lookup = oa21_ward22, # NOTE - be aware that I updated the process for preparing the births data. Quite sure that the data is correct and in the same format, but in case something goes wrong check here. 
@@ -66,8 +71,8 @@ births <- aggregate_geographies_2(data = births, lookup = oa21_ward22, # NOTE - 
 
 births[, age := 0]
 
-### 2.4. should have a separate section here I feel for filtering by year, rather than doing it in the section above in a slightly scattered way. A bit neater/clearer. 
-### also, overall, the script to this exact point here is what I need to convert to general functions with respect to years and geography to make the whole thing flexible. Also need to change geography labels below, but that's a lot easier.
+  ### 2.4. should have a separate section here I feel for filtering by year, rather than doing it in the section above in a slightly scattered way. A bit neater/clearer. 
+  ### also, overall, the script to this exact point here is what I need to convert to general functions with respect to years and geography to make the whole thing flexible. Also need to change geography labels below, but that's a lot easier.
 
 
 ## 4. joining the datasets, adding on la codes

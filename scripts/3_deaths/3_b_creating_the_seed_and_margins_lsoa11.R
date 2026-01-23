@@ -1,7 +1,5 @@
-## for creating net flows at msoa11 level for 2011, we need deaths at single year of age for msoa11. Meaning we need to do another whole run of the ipf process.
-## going to create them at lsoa11, which will then perfectly aggregate up to msoa11. 
-## also, we only need this for 2011 
-## basically just copied and amended scripts 3_a and 3_b. Put some work into making it a lot more compact etc. 
+## creates the inputs needed - the seed and the margin table - to feed into IPF to create single year of age death estimates on the lsoa11 boundaries
+## again no need to make this general with respect to year. The lsoa11 deaths dataset was released up to 2023 and won't be updated again. So it's fine to hardcode the value of 2023 in there. 
 
 ## 0. libraries and functions
 library(data.table)
@@ -15,14 +13,18 @@ lapply(
 )
 
 
-## 1. reading in the death data, narrowing to years
+## 1. reading in the lsoa11 death data, narrowing to years
 lsoa_deaths <- data.table(readRDS("input_data/intermediate/deathsbylsoa11midyear01to23.rds"))
 
 lsoa_deaths <- lsoa_deaths[year >= 2010 & year <= 2023, ]
 
 
 ## 2. reading in the la level mid year estimates, extracting the death components
-mye_series <- data.table(readRDS("input_data/raw/population_estimates_gla_timeseries_2001_2024.rds"))
+
+  ### 2.1. reading in, extracting death data
+tmp <- tempfile(fileext = ".rds")
+download.file(latest_gla_mye_url, tmp, mode = "wb")
+mye_series <- data.table(readRDS(tmp))
 
 lad_deaths <- mye_series[component == "deaths" & year >= 2010 & year <= 2023, 
                          c("gss_code", "gss_name", "year", "age", "sex", "value")]
@@ -32,8 +34,7 @@ lad_deaths[value < 0, value := 0]
 rm(mye_series)
 gc()
 
-## 3. converting the lad geographies to 2023 
-
+  ### 2.2. converting the lad geographies to 2023 
 lad_deaths <- recode_gss(df_in = lad_deaths[, -"gss_name"], 
                          col_code = "gss_code", 
                          col_data = "value",
@@ -64,10 +65,9 @@ colnames(lsoa_deaths) <- tolower(colnames(lsoa_deaths))
 
 lsoa_deaths_11 <- lsoa_deaths[, c("lsoa11cd", "gss_code", "year", "age_group", "sex", "deaths")]
 
-lsoa_deaths_11_formar <- copy(lsoa_deaths_11)
+lsoa_deaths_11_formar <- copy(lsoa_deaths_11) # copying the dataset, because we'll need the original later to create one of the margins. formar means "for margin". 
 
-
-### 4.2. splitting the 5-year age bands into single year of age
+  ### 4.2. splitting the 5-year age bands into single year of age (TO DO - need a function to do this)
 setkey(age_lookup_lsoa, "lsoa_deaths")
 setkey(lsoa_deaths_11, "age_group")
 
@@ -85,24 +85,20 @@ lsoa_deaths_11[, deaths := deaths/N]
 lsoa_deaths_11 <- lsoa_deaths_11[, c("lsoa11cd", "gss_code", "year", "sya", "sex", "deaths")]
 colnames(lsoa_deaths_11)[2] <- "lad22cd"
 
-lsoa_seed <- lsoa_deaths_11
-
+lsoa_seed <- copy(lsoa_deaths_11)
 
 
 ## 5. creating the margins
+## only two margins - fairly simple process at the moment, but fine for its intended purposes
+## should put 5 year age bands in the margins, but given that the seed table is the 5-year split out into single, would make little difference
 
-  ### 5.1. lad21 by year by sya by sex
+  ### 5.1. lad by year by sya by sex
 lad_deaths <- lad_deaths[, c("gss_code", "year", "age", "sex", "value")]
 colnames(lad_deaths)[1] <- "lad22cd"
 
-lad_deaths[age %in% c(85, 86, 87, 88, 89, 90), age := 85]
+lad_deaths_mar <- copy(lad_deaths)
 
-lad_deaths <- lad_deaths[, .(value = sum(value)), 
-                         by = list(lad22cd, year, age, sex)]
-
-lad_deaths_mar <- lad_deaths
-
-  ### 5.2. lsoa11 by lad21 by year by sex
+  ### 5.2. lsoa11 by lad by year by sex
 lsoa_deaths_mar <- lsoa_deaths_11_formar[, .(deaths = sum(deaths)),
                                          by = list(lsoa11cd, gss_code, year, sex)]
 
@@ -111,12 +107,10 @@ colnames(lsoa_deaths_mar)[2] <- "lad22cd"
 rm(lsoa_deaths_11_formar)
 gc()
 
-
-  ### 5.4. scaling the lsoa figures so that the marginals add up (IPF doesn't work if the marginals give different totals)
-  ### by getting the ratio difference between the two marginals by year and sex and lad22cd, and multiplying the lsoa values by these scaling factors
-  ### this will lead to decimal points in the marginal for lsoas. I think this is ok, because they're just an input into creating estimates for deaths, which we can round later if we like. 
-  ### this also means that I am assuming that the local authority level mid year estimates are the "correct" estimates and that we scale the lsoa estimates to match them. This may or may not be a sound assumption, but I don't think it matters very much as the differences are very small. 
-
+  ### 5.4. scaling the lsoa figures so that the margins add up (IPF doesn't work if the margins give different totals)
+  ### by getting the ratio difference between the two margins by year and sex and lad, and multiplying the lsoa values by these scaling factors
+  ### this will lead to decimal points in the margin for lsoas. I think this is ok, because they're just an input into creating estimates for deaths, which we can round later if we like. 
+  ### this also means that I am assuming that the local authority level mid year estimates are the "correct" estimates and that we scale the lsoa estimates to match them. This may or may not be a sound assumption, but it doesn't matter very much as the differences are very small. 
 lad_scale <- lad_deaths_mar[, .(deaths_lad = sum(value)),
                             by = list(lad22cd, year, sex)]
 
@@ -140,8 +134,7 @@ lsoa_deaths_mar <- scaling_factors[lsoa_deaths_mar]
 lsoa_deaths_mar[, deaths := deaths*scaling_factors]
 lsoa_deaths_mar <- lsoa_deaths_mar[, -"scaling_factors"]
 
-
-  ### 5.5. adding values of 0 for cells that are missing
+  ### 5.5. adding values of 0 for cells that are missing (in the dataset made available by ONS, it seems that they sometimes leave out a category entirely if there are no deaths, rather than leave it in with a value of 0. For example, if in a particular year in a particular lsoa, there were no deaths of 20 year olds, that combination of categories would be missing from the dataset rather than counted as 0). 
 lsoa_seed_missing <- get_missing_categories(dataset = lsoa_seed, 
                                             cat_cols = c("lsoa11cd", "year", "sya", "sex"),
                                             value_col = "deaths")
@@ -166,10 +159,10 @@ lsoa_deaths_mar <- rbind(lsoa_deaths_mar, lsoa_deaths_mar_missing)
 lsoa_seed[is.na(deaths), deaths := 0]
 lsoa_deaths_mar[is.na(deaths), deaths := 0]
 
+
 ## 6. saving the outputs
 saveRDS(object = lsoa_seed,
         file = "input_data/intermediate/lsoa11_seed.rds")
-
 
 saveRDS(object = lad_deaths_mar,
         file = "input_data/intermediate/lad_deaths_margin_lsoa11.rds")
@@ -182,3 +175,5 @@ saveRDS(object = lsoa_deaths_mar,
 rm(list = ls())
 gc()
 gc()
+
+

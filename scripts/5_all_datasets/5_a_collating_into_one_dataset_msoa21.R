@@ -112,3 +112,7 @@ file_path <- paste0("output_data/revised_backseries_msoa21cd_2012_", max_year, "
 saveRDS(object = full_backseries,
         file = file_path)
 
+check <- readRDS(paste0("output_data/revised_backseries_msoa21cd_2012_", max_year, ".rds"))
+
+check[outflow < 0, ]
+

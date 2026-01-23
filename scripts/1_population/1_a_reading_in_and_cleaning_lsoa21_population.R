@@ -1,155 +1,85 @@
+## note - could make most of this script into smaller functions, and then do all of 1_a, 1_b, 1_c together in one script
 
-
-## 1. libraries and functions
+# 0. libraries and functions
+library(nomisr)
 library(data.table)
-library(openxlsx)
-library(gsscoder)
+library(parallel)
 
 source("scripts/inputs.R")
 
-## 2.  reading in the raw lsoa-level rebased mid-year estimates from 2011 to the max year
-mye_2011 <- read.xlsx("https://www.ons.gov.uk/file?uri=/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/lowersuperoutputareamidyearpopulationestimates/mid2011tomid2014/sapelsoasyoa20112014.xlsx",
-                      sheet = 5,
-                      startRow = 4)
 
-mye_2012 <- read.xlsx("https://www.ons.gov.uk/file?uri=/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/lowersuperoutputareamidyearpopulationestimates/mid2011tomid2014/sapelsoasyoa20112014.xlsx",
-                      sheet = 6,
-                      startRow = 4)
+## 1. finding the right dataset on nomis, extracting the geography codes for the correct geography
 
-mye_2013 <- read.xlsx("https://www.ons.gov.uk/file?uri=/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/lowersuperoutputareamidyearpopulationestimates/mid2011tomid2014/sapelsoasyoa20112014.xlsx",
-                      sheet = 7,
-                      startRow = 4)
+  ### 1.1. getting the lsoa nomis id codes
+lsoas_21_geogtab <- nomis_get_metadata(id = "NM_2014_1", # as a note, NM_2020_1 is the code for 2011-based. 
+                                       concept = "geography",
+                                       type = "TYPE151") # TYPE151 for 2021 lsoas
 
-mye_2014 <- read.xlsx("https://www.ons.gov.uk/file?uri=/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/lowersuperoutputareamidyearpopulationestimates/mid2011tomid2014/sapelsoasyoa20112014.xlsx",
-                      sheet = 8,
-                      startRow = 4)
-
-mye_2015 <- read.xlsx("https://www.ons.gov.uk/file?uri=/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/lowersuperoutputareamidyearpopulationestimates/mid2015tomid2018/sapelsoasyoa20152018.xlsx",
-                      sheet = 5,
-                      startRow = 4)
-
-mye_2016 <- read.xlsx("https://www.ons.gov.uk/file?uri=/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/lowersuperoutputareamidyearpopulationestimates/mid2015tomid2018/sapelsoasyoa20152018.xlsx",
-                      sheet = 6,
-                      startRow = 4)
-
-mye_2017 <- read.xlsx("https://www.ons.gov.uk/file?uri=/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/lowersuperoutputareamidyearpopulationestimates/mid2015tomid2018/sapelsoasyoa20152018.xlsx",
-                      sheet = 7,
-                      startRow = 4)
-
-mye_2018 <- read.xlsx("https://www.ons.gov.uk/file?uri=/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/lowersuperoutputareamidyearpopulationestimates/mid2015tomid2018/sapelsoasyoa20152018.xlsx",
-                      sheet = 8,
-                      startRow = 4)
-
-mye_2019 <- read.xlsx("https://www.ons.gov.uk/file?uri=/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/lowersuperoutputareamidyearpopulationestimates/mid2019tomid2022/sapelsoasyoa20192022.xlsx",
-                      sheet = 5,
-                      startRow = 4)
-
-mye_2020 <- read.xlsx("https://www.ons.gov.uk/file?uri=/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/lowersuperoutputareamidyearpopulationestimates/mid2019tomid2022/sapelsoasyoa20192022.xlsx",
-                      sheet = 6,
-                      startRow = 4)
-
-mye_2021 <- read.xlsx("https://www.ons.gov.uk/file?uri=/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/lowersuperoutputareamidyearpopulationestimates/mid2019tomid2022/sapelsoasyoa20192022.xlsx",
-                      sheet = 7,
-                      startRow = 4)
-
-mye_2022 <- read.xlsx("https://www.ons.gov.uk/file?uri=/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/lowersuperoutputareamidyearpopulationestimates/mid2022revisednov2025tomid2024/sapelsoasyoa20222024.xlsx",
-                      sheet = 5,
-                      startRow = 4)
-
-mye_2023 <- read.xlsx("https://www.ons.gov.uk/file?uri=/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/lowersuperoutputareamidyearpopulationestimates/mid2022revisednov2025tomid2024/sapelsoasyoa20222024.xlsx",
-                      sheet = 6,
-                      startRow = 4)
-
-mye_2024 <- read.xlsx("https://www.ons.gov.uk/file?uri=/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/lowersuperoutputareamidyearpopulationestimates/mid2022revisednov2025tomid2024/sapelsoasyoa20222024.xlsx",
-                      sheet = 7,
-                      startRow = 4)
+lsoas_21_geogvec <- lsoas_21_geogtab$id
 
 
-## 3. getting them all into one dataset
-
-  ### 3.1. converting them all to data.table (think it's quickest to do this manually)
-mye_2011 <- data.table(mye_2011)
-mye_2012 <- data.table(mye_2012)
-mye_2013 <- data.table(mye_2013)
-mye_2014 <- data.table(mye_2014)
-mye_2015 <- data.table(mye_2015)
-mye_2016 <- data.table(mye_2016)
-mye_2017 <- data.table(mye_2017)
-mye_2018 <- data.table(mye_2018)
-mye_2019 <- data.table(mye_2019)
-mye_2020 <- data.table(mye_2020)
-mye_2021 <- data.table(mye_2021)
-mye_2022 <- data.table(mye_2022)
-mye_2023 <- data.table(mye_2023)
-mye_2024 <- data.table(mye_2024)
-
-  ### 3.2. adding year (again, I think it's quickest to do this manually, because I'm looping through data.tables. Another option would have been to put them all in a list, and then use lapply. Possibly a better option.)
-mye_2011[, year := 2011]
-mye_2012[, year := 2012]
-mye_2013[, year := 2013]
-mye_2014[, year := 2014]
-mye_2015[, year := 2015]
-mye_2016[, year := 2016]
-mye_2017[, year := 2017]
-mye_2018[, year := 2018]
-mye_2019[, year := 2019]
-mye_2020[, year := 2020]
-mye_2021[, year := 2021]
-mye_2022[, year := 2022]
-mye_2023[, year := 2023]
-mye_2024[, year := 2024]
-
-  ### 3.3. final getting them all into one
-colnames(mye_2022) <- gsub("2023", "2021", colnames(mye_2022)) # coding everything back to 2021, because that's currently what the rest of the repo is set up for. Although it might be good to have a process at the start of every script to update every data set with lad codes to the most recent. 
-colnames(mye_2023) <- gsub("2023", "2021", colnames(mye_2023))
-colnames(mye_2024) <- gsub("2023", "2021", colnames(mye_2024))
-
-mye_11_maxyear <- rbind(mye_2011, mye_2012, mye_2013, mye_2014, mye_2015, mye_2016, mye_2017, mye_2018, mye_2019, mye_2020, mye_2021, mye_2022, mye_2023, mye_2024)
+## 2. creating the function to get a single lsoa of data
+get_data_one_geog <- function(geog_id){
+  
+  extracted_geog_data <- nomis_get_data(id = "NM_2014_1",
+                                        geography = geog_id,
+                                        measures = 20100,
+                                        select = c("date", "geography_name", "geography_code", "gender_name", "c_age_name", "c_age_type", "obs_value"))
+  
+  extracted_geog_data <- data.table(extracted_geog_data)
+  
+  return(extracted_geog_data)
+  
+}
 
 
-## 4. pivoting longer, adding columns for age and sex, fixing up the codes
-mye_11_maxyear <- data.table::melt(mye_11_maxyear, id.vars = c("LAD.2021.Code", "LAD.2021.Name", "LSOA.2021.Code", "LSOA.2021.Name", "year"))
+## 3. extracting the data with parallel computing
 
-mye_11_maxyear <- mye_11_maxyear[variable != "Total", ]
+  ### 3.1. setting up the cluster
+no_cores <- round(detectCores()*0.75)
 
-mye_11_maxyear <- mye_11_maxyear[, sex := "empty"]
+cl <- makeCluster(no_cores)
 
-mye_11_maxyear[grepl("F", variable), sex := "female"]
-mye_11_maxyear[grepl("M", variable), sex := "male"]
+clusterEvalQ(cl = cl, expr = c(library(nomisr),
+                               library(data.table)))
 
-mye_11_maxyear[, age := as.numeric(gsub("M|F", "", variable))]
+clusterExport(cl = cl, c("lsoas_21_geogvec", "get_data_one_geog"))
 
+  ### 3.2. getting the data, binding into one data.table
+lsoa_data <- parLapply(cl = cl,
+                       X = lsoas_21_geogvec,
+                       fun = get_data_one_geog)
 
-  ### 4.1. recoding 2022-2024 back to lad21
-mye_22_24 <- mye_11_maxyear[year >= 2022 & year <= 2024, ]
-
-mye_22_24 <- gsscoder::recode_gss(df_in = mye_22_24[, -"LAD.2021.Name"], 
-                                  col_code = "LAD.2021.Code",
-                                  col_data = "value",
-                                  recode_from_year = 2023,
-                                  recode_to_year = 2021)
-
-mye_22_24 <- data.table(mye_22_24)
-
-la_names_lookup <- unique(mye_2021[, c("LAD.2021.Code", "LAD.2021.Name")])
-
-mye_22_24 <- la_names_lookup[mye_22_24, on = "LAD.2021.Code"]
-
-mye_11_maxyear <- mye_11_maxyear[year < 2022, ]
-
-mye_11_maxyear <- rbind(mye_11_maxyear,
-                        mye_22_24)
+lsoa_data <- rbindlist(lsoa_data)
 
 
-## 5. final cleaning and reading out
-colnames(mye_11_maxyear) <- c("lad21cd", "lad21nm", "lsoa21cd", "lsoa21nm", "year", "variable", "population", "sex", "age")
+## 4. filtering, selecting, renaming, etc
+colnames(lsoa_data) <- tolower(colnames(lsoa_data))
 
-mye_11_maxyear <- mye_11_maxyear[, c("lad21cd", "lad21nm", "lsoa21cd", "lsoa21nm", "year", "age", "sex", "population")]
+lsoa_data <- lsoa_data[c_age_type == "Individual age" & gender_name != "Total" & c_age_name != "All Ages", ]
 
-file_path <- paste0("input_data/intermediate/mid_year_rebased_2011", max_year, "_lsoa21.rds")
 
-saveRDS(object = mye_11_maxyear, 
-        file = file_path) 
+lsoa_data[, c_age_name := gsub("Age |Aged", "", c_age_name)]
+lsoa_data[c_age_name == " 90+", c_age_name := 90]
+lsoa_data[, c_age_name := as.numeric(c_age_name)]
+
+lsoa_data[, gender_name := tolower(gender_name)]
+
+lsoa_data <- lsoa_data[, c("date", "geography_name", "geography_code", "c_age_name", "gender_name", "obs_value")]
+
+colnames(lsoa_data) <- c("year", "lsoa21nm", "lsoa21cd", "age", "sex", "population")
+
+lsoa_data <- lsoa_data[year >= min_year & year <= max_year, ]
+
+
+## 5. saving the dataset
+file_path <- paste0("input_data/intermediate/mid_year_rebased_", min_year, max_year, "_lsoa21.rds")
+
+saveRDS(object = lsoa_data,
+        file_path)
+
 
 rm(list = ls())
+
+gc()
 gc()

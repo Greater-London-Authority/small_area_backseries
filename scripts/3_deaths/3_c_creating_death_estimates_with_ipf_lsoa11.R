@@ -1,3 +1,6 @@
+## carrying out the iterative proportional fitting process to create single year of age death data on lsoa11 boundaries
+## again no need to make this general with respect to year - input datasets are only updated up to 2023 and will never be updated again. 
+## lad codes needed for iterative proportional fitting, but have decided to take them out afterwards - unless there is a good reason, default should be that there is only one geography
 
 ## 0. libraries and functions
 library(data.table)
@@ -25,19 +28,17 @@ lad_deaths_mar <- lad_deaths_mar[, c("lad22cd", "year", "age", "sex", "value")]
 
 
 ## 2. defining the function that will carry out the ipf
-all_geogs <- lsoa_seed[, unique(lad22cd)]
-input_geog <- all_geogs[1]
 
 ipf_est <- function(input_geog){
   
-    ### 2.1. narrowing down seed and marginals by geography
+    ### 2.1. narrowing down seed and margins by geography
   lsoa_seed_sel <- lsoa_seed[lad22cd == input_geog, ]
   
   lsoa_deaths_mar_sel <- lsoa_deaths_mar[lad22cd == input_geog, ]
   
   lad_deaths_mar_sel <- lad_deaths_mar[lad22cd == input_geog, ]
   
-    ### 2.2. converting the marginals into the form required by the mipfp package, a multidimensional array
+    ### 2.2. converting the margins into the form required by the mipfp package, a multidimensional array
   lsoa_year_sex_mar_ini <- tapply(X = lsoa_deaths_mar_sel$deaths,
                                   INDEX = list(lsoa_deaths_mar_sel$lsoa11cd,
                                                lsoa_deaths_mar_sel$year,
@@ -50,7 +51,6 @@ ipf_est <- function(input_geog){
                                               lad_deaths_mar_sel$sex),
                                  FUN = sum)
   
-  
     ### 2.3. converting the seed table into the form required by the mipfp package, a multidimensional array
   lsoa_seed_sel_ar <- tapply(X = lsoa_seed_sel$deaths,
                              INDEX = list(lsoa_seed_sel$lsoa11cd,
@@ -59,7 +59,6 @@ ipf_est <- function(input_geog){
                                           lsoa_seed_sel$sex),
                              FUN = sum)
   
-  
     ### 2.4. setting up the dimensions  
   tgt_data <- list(lsoa_year_sex_mar_ini,
                    year_age_sex_mar_ini)
@@ -67,13 +66,13 @@ ipf_est <- function(input_geog){
   tgt_list <- list(c(1, 2, 4),
                    c(2, 3, 4))
   
-    ### 2.5. runnnig the IPF algorithm
+    ### 2.5. runnig the IPF algorithm
   res <- (Estimate(seed = lsoa_seed_sel_ar,
                    target.list = tgt_list,
                    target.data = tgt_data,
                    method = "ipfp",
                    tol = 1e-8, # tolerance was slightly arbitrarily chosen. Put some effort into a good rationale for the tolerance. 
-                   na.target = TRUE))$x.hat # hmm, despite ensuring that all possible combinations of the categorical variables were accounted for with 0 values, there were still some NA values in the margin. Although very few. As these NA values almost certainly reflect 0 values anyway, I'm going to set it to allow na values in the margins. 
+                   na.target = TRUE))$x.hat 
   
   return(res)
   
@@ -85,6 +84,7 @@ all_geogs <- lsoa_seed[, unique(lad22cd)]
 
 fitted_ests <- list()
 start_time <- Sys.time()
+
 for(i in 1:length(all_geogs)){
   
   input_geog <- all_geogs[i]
@@ -94,6 +94,7 @@ for(i in 1:length(all_geogs)){
   fitted_ests[[i]] <- res
   
 }
+
 end_time <- Sys.time()
 
 time_taken <- end_time - start_time
@@ -118,17 +119,13 @@ fitted_deaths <- rbindlist(long_geog_list)
 
 colnames(fitted_deaths) <- c("lsoa11cd", "year", "age", "sex", "deaths", "lad23cd")
 
-fitted_deaths <- fitted_deaths[, c("lad23cd", "lsoa11cd", "year", "age", "sex", "deaths")]
+fitted_deaths <- fitted_deaths[, c("lsoa11cd", "year", "age", "sex", "deaths")] # getting rid of lad
 
 
-## 4. saving the dataset
+## 5. saving the dataset
 saveRDS(object = fitted_deaths,
         file = "input_data/intermediate/fitted_lsoa11_deaths.rds")
 
 rm(list = ls())
 gc()
-
-
-to_look <- readRDS("input_data/intermediate/fitted_lsoa11_deaths.rds")
-
-to_look <- data.table(to_look)
+gc()

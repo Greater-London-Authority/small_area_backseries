@@ -9,17 +9,7 @@ source("scripts/inputs.R")
 
 ## 1. finding the right dataset on nomis, extracting the geography codes for the correct geography
 
-  ### 1.1. getting the data for all datasets on nomis, finding the dataset I want
-all_datasets_info <- nomis_data_info()
-all_datasets_info <- data.table(all_datasets_info)
-
-estimate_search <- all_datasets_info[grep("estimate", name.value), ]
-
-  ### 1.2. getting the ward id codes
-geog_types <- data.table(nomis_get_metadata(id = "NM_2014_1", # as a note, NM_2020_1 is the code for 2011-based. 
-                                            concept = "geography",
-                                            type = "TYPE")) # TYPE153 for 2022 wards
-
+  ### 1.1. getting the ward id codes
 wards_22_geogtab <- nomis_get_metadata(id = "NM_2014_1",
                                        concept = "geography",
                                        type = "TYPE153")
@@ -78,10 +68,17 @@ ward_data <- ward_data[, c("date", "geography_name", "geography_code", "c_age_na
 
 colnames(ward_data) <- c("year", "ward22nm", "ward22cd", "age", "sex", "population")
 
+ward_data <- ward_data[year >= min_year & year <= max_year, ]
+
 
 ## 5. saving the dataset
-file_path <- paste0("input_data/intermediate/mid_year_rebased_", ward_data[, min(year)], ward_data[, max(year)], "_ward22.rds")
+file_path <- paste0("input_data/intermediate/mid_year_rebased_", min_year, max_year, "_ward22.rds")
 
 saveRDS(object = ward_data,
         file_path)
+
+rm(list = ls())
+
+gc()
+gc()
 

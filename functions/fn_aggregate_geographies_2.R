@@ -10,8 +10,7 @@ aggregate_geographies_2 <- function(data, lookup,
   
   ## in the lookup, only keeping geography columns that we're using
   look_keep <- c(geog_from_lookup, geog_to_lookup)
-  lookup <- lookup[,..look_keep]
-  
+  lookup <- unique(lookup[,..look_keep])
   
   ## joining the dataset with the geographical lookup
   setkeyv(data, geog_from_data)
