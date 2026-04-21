@@ -1,4 +1,4 @@
-## note - could make most of this script into smaller functions, and then do all of 1_a, 1_b, 1_c together in one script
+## note - could make most of this script into smaller functions
 
 # 0. libraries and functions
 library(nomisr)

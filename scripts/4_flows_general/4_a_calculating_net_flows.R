@@ -18,7 +18,7 @@ source("scripts/inputs.R")
 ## 1. reading in the data
 
   ### 1.1. population data
-population <- readRDS(paste0("input_data/intermediate/mid_year_rebased_", min_year, max_year, "_lsoa21.rds")) # lsoa is currently the lowest level we're working at
+population <- readRDS(paste0("input_data/intermediate/mid_year_rebased_", min_year, max_year, "_lsoa21.rds"))
 
 deaths <- readRDS("input_data/intermediate/fitted_lsoa11_deaths.rds")
 
@@ -51,8 +51,8 @@ if(grepl(pattern = "rds", x = lsoa21_lookup_path)){
 }
 
 
-oa21_lookup_extended <- extend_lookup_and_add_weight(oa21_lookup, year_start = 2011, year_end = 2024) # for best fit lookups, converting them into "weighted" lookups by year, with all weights equal to 1. That way, they can all be treated the same, and if we decide to create a weighted lookup for what is currently a best-fit lookup
-lsoa21_lookup_extended <- extend_lookup_and_add_weight(lsoa21_lookup, year_start = 2011, year_end = 2024)
+oa21_lookup_extended <- extend_lookup_and_add_weight(oa21_lookup, year_start = 2011, year_end = 2024, add_weight = log_oa21_lookup_best_fit) # for best fit lookups, converting them into "weighted" lookups by year, with all weights equal to 1. If it's already weighted, extend the lookups to the years we need and keeps the original weight
+lsoa21_lookup_extended <- extend_lookup_and_add_weight(lsoa21_lookup, year_start = 2011, year_end = 2024, add_weight = log_lsoa21_lookup_best_fit) 
 
 
 ## 2. aggregating all input datasets to common age categories and common geographies, and calculating cohort
@@ -212,4 +212,3 @@ saveRDS(object = flows_fin,
 
 rm(list = ls())
 gc()
-

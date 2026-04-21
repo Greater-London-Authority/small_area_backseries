@@ -17,7 +17,7 @@ aggregate_geographies_2 <- function(data, lookup,
   
   setkeyv(lookup, geog_from_lookup)
   
-  data <- lookup[data]
+  data <- lookup[data, allow.cartesian = TRUE]
   
   data <- data[,-..geog_from_lookup]
   

@@ -1,7 +1,6 @@
 ## one off script, using only data from 2011, to calculate netflows on msoa11 boundaries. This is needed later to get base gross flows. 
 ## no need to make flexible with respect to year or geography. We only need msoa11 data for 2011 to match with the msoa11 ukmig tables from census 2011. 
 
-## only issue (or, the only major issue) with this script is that it needs to read in a lot of data that I found on the Q drive, that I saved locally, and that I don't know where to find in any sort of reasonable format. 
 ## the includes msoa11 population at 2010 and 2011, and births at oa11
 
 
@@ -15,6 +14,8 @@ lapply(
   FUN = source
 )
 
+source("scripts/inputs.R")
+
 
 ## 1. reading in data, narrowing down to the years we need, aggregating lsoa11 to msoa11
 
@@ -26,6 +27,8 @@ colnames(population) <- tolower(colnames(population))
 deaths <- readRDS("input_data/intermediate/fitted_lsoa11_deaths.rds")
 
 births <- data.table(readRDS("input_data/intermediate/births_oa11_mid_2002_2020.rds"))
+births[, year := as.numeric(year)]
+
 
 all_11_lookup <- fread("lookups/2011_oa_lsoa_msoa_lad.csv")
 
@@ -155,7 +158,6 @@ flows[, births := NA]
 flows <- flows[, c("msoa11cd", "year", "age", "cohort", "sex", "births", "deaths", "population_last_year", "population", "gross_flows")]
 
 flows_all <- rbind(flows_0, flows, flows_end)
-
 
 saveRDS(object = flows_all, 
         file = "input_data/intermediate/msoa11_flows.rds")

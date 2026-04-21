@@ -95,6 +95,9 @@ births_oa11 <- births_oa11[, c("oa11", "sex", "year", "value")]
 
 colnames(births_oa11) <- c("OA11CD", "sex", "year", "births") # set up in exactly the same way as the version we had saved locally that was used previously
 
+births_oa11[sex == 1, sex := "male"]
+births_oa11[sex == 2, sex := "female"]
+
 saveRDS(object = births_oa11,
         file = "input_data/intermediate/births_oa11_mid_2002_2020.rds")
 

@@ -8,7 +8,8 @@ library(shiny)
 source("scripts/inputs.R")
 
 ## 1. data
-backseries <- data.table(readRDS(file_path <- paste0("output_data/revised_backseries_", dest_geog_colname, "_", min_year + 1, "_", max_year, ".rds")))
+backseries <- data.table(readRDS(paste0("output_data/revised_backseries_", dest_geog_colname, "_", min_year + 1, "_", max_year, ".rds")))
+
 
 ## 2. for a single lsoa, shiny app with charts showing deaths and net flows by age (because these are the two components that are estimated. We make minimal/no changes to births and population)
 ## the point is to cycle through to see if in general the results look like they make sense. Too many lsoas, never mind lsoa-year combinations, to do any sort of comprehensive sweep
@@ -26,11 +27,11 @@ sex_selection <- c("male", "female")
 year_selection <- 2012:2024
 
 #backseries_lad <- backseries[lad23cd == lad_sel, ]
-all_lsoas <- backseries[, unique(msoa21cd)]
+all_lsoas <- backseries[, unique(mz_code)]
 
-backseries_lad <- backseries[msoa21cd %in% all_lsoas[1:500] ,]
+backseries_lad <- backseries[mz_code %in% all_lsoas[1:1725] ,]
 
-lsoa_selection <- all_lsoas[1:500]
+lsoa_selection <- all_lsoas[1:1725]
 
 
 ui <- fluidPage(

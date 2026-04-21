@@ -1,6 +1,5 @@
 ## simple script. Takes in the population data and all components of change, aggregates them to the desired final geography, and combines them into one dataset
 
-
 ## 0. libraries and functions
 library(data.table)
 
@@ -51,8 +50,9 @@ if(grepl(pattern = "rds", x = lsoa21_lookup_path)){
   
 }
 
-oa21_lookup_extended <- extend_lookup_and_add_weight(oa21_lookup, year_start = 2011, year_end = 2024) # for best fit lookups, converting them into "weighted" lookups by year, with all weights equal to 1
-lsoa21_lookup_extended <- extend_lookup_and_add_weight(lsoa21_lookup, year_start = 2011, year_end = 2024)
+
+oa21_lookup_extended <- extend_lookup_and_add_weight(oa21_lookup, year_start = 2011, year_end = 2024, add_weight = log_oa21_lookup_best_fit) # for best fit lookups, converting them into "weighted" lookups by year, with all weights equal to 1. If it's already weighted, extend the lookups to the years we need and keeps the original weight
+lsoa21_lookup_extended <- extend_lookup_and_add_weight(lsoa21_lookup, year_start = 2011, year_end = 2024, add_weight = log_lsoa21_lookup_best_fit)
 
 
 ## 2. aggregating all geographies to destination geography and to common age categories
@@ -123,8 +123,4 @@ saveRDS(object = full_backseries,
 rm(list = ls())
 gc()
 gc()
-
-
-
-
 

@@ -24,11 +24,17 @@ lsoa11_population_path <- "https://data.london.gov.uk/download/ex9jd/feh/populat
 
 ## paths to the lookups for aggregation
 ## for the process as it is currently written, we need lookups from lsoa11, oa21, and lsoa21. These all need to be matched with the same higher geography for the same run. 
-## at the moment, the process assumes that the lookup from 2011 will be address weighted by year, and that the lookups from 2021 will be simple best fit. We may need to make it more flexible soon! 
-lsoa11_lookup_path <- "lookups/lsoa11cd_to_mz.rds"
+## NB. the lookups from oa21 and lsoa21, to whatever the desired geography is, can either be weighted or not. The code will work with each of these cases slightly differently, at the start of scripts 4_a and 5_c. So it's very important to set the logical arguments below correctly - TRUE if the 2021 lookup is best-fit or exact-fit to the desired end geography, FALSE if it is a weighted lookup to the desired end geography. 
 
-oa21_lookup_path <- "lookups/oa21cd_to_mz.rds"
 
-lsoa21_lookup_path <- "lookups/lsoa21cd_to_mz.rds"
+"lookups/lsoa11_ward22_weighted_extended.rds"
+lsoa11_lookup_path <- "lookups/lsoa11_ward22_weighted_extended.rds"
 
-dest_geog_colname <- "mz_code" # all lookups need to have this as the column name of the destination geography
+oa21_lookup_path <- "lookups/oa21_ward22_best_fit.csv"
+log_oa21_lookup_best_fit <- TRUE # tells it whether to add a new artificial weight of 1 to all cells. If the input lookup here is best-fit or exact-fit, then this should be TRUE. If the input lookup already has a weight column, the add FALSE. 
+
+lsoa21_lookup_path <- "lookups/lsoa21_ward22_best_fit.csv"
+log_lsoa21_lookup_best_fit <- TRUE # tells it whether to add a new artificial weight of 1 to all cells. If the input lookup here is best-fit or exact-fit, then this should be TRUE. If the input lookup already has a weight column, the add FALSE. 
+
+dest_geog_colname <- "ward22cd" # all lookups need to have this as the column name of the destination geography
+

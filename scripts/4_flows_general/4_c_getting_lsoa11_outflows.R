@@ -1,6 +1,5 @@
 ## no need to make this script general with respect to year. Only uses datasets for 2011, that won't be updated again. 
 ## in fact, this doesn't even need to be run each time. It just creates/estimates a quantity we need, which is total outflows for 2011, and could easily save the results somewhere. Datastore? 
-## again, an issue is that I need to read in datasets that I found on the Q drive, but that are awkward to find anywhere else. I think it will have to be nomis. TO DO. 
 
 ## 0. libraries and functions
 library(data.table)

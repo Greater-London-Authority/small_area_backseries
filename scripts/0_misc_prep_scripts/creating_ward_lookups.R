@@ -15,6 +15,24 @@ oa_21_pwcs <- st_read("geo/Pop_Centroids_EnglandWales_2021.shp")
 
 ward_22 <- st_read("geo/WD_DEC_2022_UK_BFC.shp")
 
+lad_23 <- st_read("geo/LAD_DEC_2023_UK_BFC.shp")
+
+
+## ward22 to lad23
+ward_22 <- st_transform(ward_22, crs = 27700)
+lad_23 <- st_transform(lad_23, crs = 27700)
+
+ward_22_centroids <- st_centroid(ward_22)
+
+ward22_lad23 <- st_join(ward_22_centroids, lad_23)
+ward22_lad23 <- data.table(ward22_lad23)
+
+ward22_lad23 <- ward22_lad23[, c("WD22CD", "WD22NM", "LAD23CD", "LAD23NM")]
+
+colnames(ward22_lad23) <- tolower(colnames(ward22_lad23))
+
+
+
 
 ## 2. oa21 to ward22
 oa_21_pwcs <- st_transform(oa_21_pwcs, crs = 27700)
@@ -201,6 +219,12 @@ oa21_ward22[ward22cd%in% all_missing_wards, ward22cd := "unmatched"]
 oa21_ward22 <- unique(oa21_ward22)
 
 ## 5. saving the lookups
+
+ward22_lad23
+
+saveRDS(object = ward22_lad23,
+        file = "lookups/ward22_lad23.rds")
+
 saveRDS(object = oa21_ward22,
         file = "lookups/oa21_ward22_bf.rds")
 
