@@ -5,6 +5,5 @@
 geo/
 input_data/
 output_data/
-scripts/0_misc_prep_scripts/
 scripts/6_qa/
 plots/

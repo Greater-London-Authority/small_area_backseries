@@ -126,36 +126,6 @@ lsoa11_ward22_all_full <- rbind(lsoa11_ward22_all,
 lsoa11_ward22_all_full <- lsoa11_ward22_all_full[weight != 0, ] # getting rid of those with a weight of 0 
 
 
-  # CHECKING ERROR
-#lsoa11_lad_lookup <- fread("lookups/2011_oa_lsoa_msoa_lad.csv") # checking if this has sorted the problem
-#lsoa11_lad_lookup <- unique(lsoa11_lad_lookup[, c("lsoa11cd", "ladcd")])
-
-#setkey(lsoa11_ward22_all_full, "lsoa11cd")
-#setkey(lsoa11_lad_lookup, "lsoa11cd")
-
-
-#nrow(lsoa11_ward22_all_full)
-#lsoa11_ward22_all_full <- lsoa11_lad_lookup[lsoa11_ward22_all_full]
-
-#ward_lad_relationships <- unique(lsoa11_ward22_all_full[, c("ward22cd", "ladcd")])
-
-#ward_counts <- ward_lad_relationships[, .(count = length(ladcd)),
-#                       by = list(ward22cd)]
-
-#ward_counts[count != 1, ]
-## two remaining wards that are allocated to multiple lads. E05014284 and W05001131. Just change them manually. Also no need to overthink it - they're outside of London. 
-
-#lsoa11_ward22_all_full[ward22cd == "E05014284", ] # agh...they all have a weight of 1. Right, so these particular ones are introduced by the best fit lookup. 
-## E01027798 is in E07000167, E01027833 and E01027834 and E01027835 are in E07000168
-
-
-#lsoa11_ward22_all_full[ward22cd == "W05001131", ]
-## W01000060 is in W06000002, W01000442 is in W06000023
-
-  # END OF CHECKING ERROR
-
-## NOTE for when I come back. I have fixed this best fit lookup that I've created, but what about the others? Need to check....because it could throw off the results
-
 ## converting city wards to city overall
 city_wards <- c("E05009288", "E05009289", "E05009290", "E05009291", "E05009292", "E05009293", "E05009294", "E05009295", "E05009296", "E05009297", "E05009298", "E05009299", 
                 "E05009300", "E05009301", "E05009302", "E05009303", "E05009304", "E05009305", "E05009306", "E05009307", "E05009308", "E05009309", "E05009310", "E05009311", "E05009312")
