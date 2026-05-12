@@ -43,6 +43,8 @@ la_pop_from_lsoa <- aggregate_geographies_2(data = lsoa_population,
 
 la_level_backseries <- la_level_backseries[component == "population", -"component"]
 
+la_level_backseries[value < 0, value := 0]
+
   ### 2.2. joining the lad estimates derived from aggregating lsoa estimates with the revised and adjusted backseries
 setnames(la_pop_from_lsoa, old = "population", new = "pop_from_lsoa") 
 setnames(la_level_backseries, old = "value", new = "pop_from_backseries")
@@ -54,10 +56,12 @@ scaling_factors <- la_level_backseries[la_pop_from_lsoa]
 
 scaling_factors[, scaling_factor := pop_from_backseries/pop_from_lsoa]
 
-scaling_factors <- scaling_factors[year >= 2016 & !is.na(scaling_factor), c("gss_code", "sex", "year", "age", "scaling_factor")]
+scaling_factors[!is.finite(scaling_factor), scaling_factor := 1]
+
+scaling_factors <- scaling_factors[scaling_factors, c("gss_code", "sex", "year", "age", "scaling_factor")]
 
 
-## 3. apply the scaling factors to the lsoa population estimates, to constrain them to the adjusted population estimates for young children
+## 3. apply the scaling factors to the lsoa population estimates, to constrain them to the adjusted population estimates
 
 lsoa_population <- lsoa_la_lookup[lsoa_population, on = "lsoa21cd"] # joining on lad codes
 
@@ -65,9 +69,6 @@ setkey(scaling_factors, "gss_code", "sex", "year", "age") # joining the scaling 
 setkey(lsoa_population, "lad23cd", "sex", "year", "age")
 
 lsoa_population <- scaling_factors[lsoa_population]
-
-
-lsoa_population[is.na(scaling_factor), scaling_factor := 1] # setting all cells where scaling factor is NA (not in the years or ages covered in the adjustments, or in wales) to 1 so that the population will remain unchanged after application
 
 lsoa_population[, population := scaling_factor*population] # applying the scaling factors
 

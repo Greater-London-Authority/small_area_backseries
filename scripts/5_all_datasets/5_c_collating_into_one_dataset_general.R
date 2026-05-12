@@ -65,7 +65,7 @@ population <- aggregate_geographies_weighted(data = population, lookup = lsoa21_
                                              geog_to_lookup = dest_geog_colname, count_names = "population")
 
   ### 2.2. deaths
-deaths <- aggregate_geographies_weighted(data = deaths[year >= min_year, ], lookup = lsoa11_lookup_weighted,
+deaths <- aggregate_geographies_weighted(data = deaths[year > min_year, ], lookup = lsoa11_lookup_weighted,
                                          geog_from_data = "lsoa11cd", geog_from_lookup = "lsoa11cd",
                                          geog_to_lookup = dest_geog_colname, count_name = "deaths")
 
@@ -82,7 +82,7 @@ if(max_year >= 2024){
 }
 
   ### 2.3. births
-births <- births[year >= min_year & year <= max_year, ]
+births <- births[year > min_year & year <= max_year, ]
 
 births <- aggregate_geographies_weighted(data = births, lookup = oa21_lookup_extended, 
                                          geog_from_data = "oa21cd", geog_from_lookup = "oa21cd",
@@ -99,7 +99,9 @@ setkeyv(births, join_cols)
 setkeyv(deaths, join_cols)
 setkeyv(flows, join_cols)
 
-full_backseries <- population[flows]
+full_backseries <- population
+
+full_backseries <- flows[full_backseries]
 
 full_backseries <- deaths[full_backseries]
 
