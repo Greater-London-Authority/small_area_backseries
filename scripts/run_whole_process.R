@@ -13,11 +13,12 @@ source("scripts/1_population/1_d_constraining_to_la_backseries.R")
 source("scripts/2_births/2_a_births_data_prep.R")
 
 source("scripts/3_deaths/3_a_reading_in_and_processing_data.R")
-source("scripts/3_deaths/3_b_creating_the_seed_and_margins_lsoa11.R")
-source("scripts/3_deaths/3_c_creating_death_estimates_with_ipf_lsoa11.R")
-source("scripts/3_deaths/3_d_creating_seed_and_margins_lsoa21.R")
-source("scripts/3_deaths/3_e_creating_death_estimates_with_ipf_lsoa21.R")
-
+source("scripts/3_deaths/3_b_creating_lsoa11_deaths_estimates.R")
+source("scripts/3_deaths/3_c_creating_lsoa21_deaths_estimates.R")
+# source("scripts/3_deaths/3_b_creating_the_seed_and_margins_lsoa11.R")
+# source("scripts/3_deaths/3_c_creating_death_estimates_with_ipf_lsoa11.R")
+# source("scripts/3_deaths/3_d_creating_seed_and_margins_lsoa21.R")
+# source("scripts/3_deaths/3_e_creating_death_estimates_with_ipf_lsoa21.R")
 
 ### C. create estimated flows from population, births, and deaths above, via residual differencing, at the desired end geography that is determined by the input lookups 
 source("scripts/4_flows_general/4_a_calculating_net_flows.R")
