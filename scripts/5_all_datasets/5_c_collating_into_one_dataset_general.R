@@ -24,7 +24,7 @@ deaths <- readRDS("input_data/intermediate/fitted_lsoa11_deaths.rds")
 
 deaths_24_onward <- readRDS(paste0("input_data/intermediate/fitted_lsoa21_deaths", "_to_", max_year, ".rds"))
 
-births <- readRDS(paste0("input_data/intermediate/births_2001_", max_year, "_oa21.rds"))
+births <- readRDS(paste0("input_data/intermediate/births_2001_", max_year, "_lsoa21.rds"))
 
   ### 1.2. lookups
 lsoa11_lookup_weighted <- readRDS(lsoa11_lookup_path)
@@ -84,8 +84,8 @@ if(max_year >= 2024){
   ### 2.3. births
 births <- births[year > min_year & year <= max_year, ]
 
-births <- aggregate_geographies_weighted(data = births, lookup = oa21_lookup_extended, 
-                                         geog_from_data = "oa21cd", geog_from_lookup = "oa21cd",
+births <- aggregate_geographies_weighted(data = births, lookup = lsoa21_lookup_extended, 
+                                         geog_from_data = "lsoa21cd", geog_from_lookup = "lsoa21cd",
                                          geog_to_lookup = dest_geog_colname, count_names = "births")
 
 births[, age := 0]
