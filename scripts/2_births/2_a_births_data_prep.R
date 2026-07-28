@@ -19,7 +19,7 @@ lapply(
 source("scripts/inputs.R")
 
 
-## 1. reading in data
+## 1. reading in data and lookups
 births_01_21 <- read.xlsx(births_01_21_path, # they have mislabelled this file. It's to June 2022, not 2021. Removed 2022 from this - otherwise results will be off. 
                           sheet = 3,
                           startRow = 6) # for sex, 1 is male, 2 is female
@@ -32,6 +32,8 @@ births_22_onwards <- read.xlsx(births_22_onwards_path,
                           startRow = 4)
 
 births_22_onwards <- data.table(births_22_onwards)
+
+oa21_lsoa21 <- fread("lookups/2021_oa_lsoa_msoa_la.csv")
 
 
 ## 2. fixing up the 2001 to 2021 data
@@ -69,7 +71,21 @@ saveRDS(object = births_01_onwards,
         file = paste0("input_data/intermediate/births_2001_", max_year, "_oa21.rds"))
 
 
-## 5. below, doing everything for births on 2011 boundaries. Doing it in a quicker, less well documented way, because a lot of the steps will be the same and we only need this dataset for script 4b
+## 5. aggregating up to lsoa21 from oa21, and saving the output (we've decided, for consistency, to work with all inputs at lsoa21)
+births_01_onwards_lsoa <- aggregate_geographies_2(
+  data = births_01_onwards,
+  lookup = oa21_lsoa21,
+  geog_from_data = "oa21cd",
+  geog_from_lookup = "oa21cd",
+  geog_to_lookup = "lsoa21cd",
+  count_names = c("births")
+)
+
+saveRDS(object = births_01_onwards_lsoa,
+        file = paste0("input_data/intermediate/births_2001_", max_year, "_lsoa21.rds"))
+
+
+## 6. below, doing everything for births on 2011 boundaries. Doing it in a quicker, less well documented way, because a lot of the steps will be the same and we only need this dataset for script 4b
 ## also, this is not something that will need to be updated as any stage
 
 tmp_zip <- tempfile(fileext = ".zip")
