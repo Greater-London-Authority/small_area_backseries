@@ -1,5 +1,7 @@
+## NOTE - script won't work automatically with new geographies, because of the lad lookup
+## but why are we adding lad codes in the first place? 
 
-## 0. libraries and functions
+## 0. libraries and functions, any inputs
 library(data.table)
 library(dplyr)
 library(tidyr)
@@ -18,10 +20,12 @@ geography_name <- "ward22"
 scenario_name <- "adjusted"
 
 
-## 1. reading files and lookups (and lots of data wrangling and processing as soon as we read the file in...)
+## 1. reading files and lookups, fixing up data, writing out as pq
 
-lookup_wd_lad <- readRDS("lookups/ward22_lad23.rds") %>%
-  select(area_code = gss_code_ward, gss_code)
+lookup_wd_lad <- readRDS("lookups/ward22_lad23.rds") %>% 
+  select(area_code = wd22cd, gss_code = lad23cd)
+
+lookup_wd_lad <- unique(lookup_wd_lad)
 
 full_series_filepath <- paste0("output_data/revised_backseries_", dest_geog_colname, "_", min_year + 1, "_", max_year, ".rds")
 
@@ -49,11 +53,13 @@ components <- full_series %>%
   arrange(gss_code, area_code, year, component, sex, age)
 
 bind_rows(population, components) %>%
-  write_dataset(path = "output_data/estimates_backseries", # new system for filepath saving, after reviewing and testing
+  write_dataset(path = paste0("output_data/estimates_backseries_", max_year),
                 format = "parquet", 
                 partitioning = c("geography", "component", "scenario", "year"))
 
 
+rm(list = ls())
+gc()
 
 
 

@@ -30,7 +30,7 @@ join_cols_base <- c("area_code", "gss_code", "geography", "scenario", "age", "se
 
 sel_scenario <- "adjusted"
 
-estimates_parquet <- open_dataset("output_data/estimates_backseries") # again, rename and automate, after testing and reviewing
+estimates_parquet <- open_dataset(paste0("output_data/estimates_backseries_", max_year))
 
 population <- estimates_parquet %>%
   filter(
@@ -168,11 +168,12 @@ for(years_to_average in c_years_to_average) {
            component = "out_migration_rates",
            year = year_max + 1) %>%
     arrange(gss_code, area_code, sex, age) %>%
-    write_dataset(path = file_path$output_parquet,
+    write_dataset(path = paste0("output_data/input_rates_", max_year),
                   format = "parquet", 
                   partitioning = c("geography", "component", "scenario", "year"))
   
 }
+paste0("output_data/input_rates_", max_year)
 
 #----------Inflows
 
@@ -186,9 +187,8 @@ for(years_to_average in c_years_to_average) {
            component = "in_migration_rates",
            year = year_max + 1) %>%
     arrange(gss_code, area_code, sex, age) %>%
-    write_dataset(path = "output_data/input_rates", # again rename and automate, after testing and reviewing
+    write_dataset(path = paste0("output_data/input_rates_", max_year), # again rename and automate, after testing and reviewing
                   format = "parquet", 
                   partitioning = c("geography", "component", "scenario", "year"))
   
 }
-
