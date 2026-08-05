@@ -26,10 +26,10 @@ iterate_flows_single_time <- function(std_pop_at_risk,
     unnest_wider(col = model_flows) 
   
   modelled_inflow <- modelled_flows %>%
-    select(area_code, geography, scenario, year, age, sex, gss_code, inflow)
+    select(area_code, geography, scenario, year, age, sex, inflow)
   
   modelled_outflow <- modelled_flows %>%
-    select(area_code, geography, scenario, year, age, sex, gss_code, outflow)
+    select(area_code, geography, scenario, year, age, sex, outflow)
   
   original_turnover <- sum(inflows$inflow) + sum(outflows$outflow)
   new_turnover <- sum(modelled_inflow$inflow) + sum(modelled_outflow$outflow)

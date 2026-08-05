@@ -1,6 +1,5 @@
 
-
-## 0. libraries and functions
+## 0. libraries, functions, inputs
 library(data.table)
 library(dplyr)
 library(tidyr)
@@ -16,20 +15,17 @@ lapply(
 source("scripts/inputs.R")
 
 
-geography_name <- "ward22"
-
 rate_max <- 0.8
 c_years_to_average <- c(5, 10, 13)
 age_max <- 90
 
 base_years_for_out_rate_prior <- c(2012, 2013, 2014)
 
-join_cols <- c("area_code", "gss_code", "geography", "scenario", "year", "age", "sex")
-join_cols_base <- c("area_code", "gss_code", "geography", "scenario", "age", "sex")
+join_cols <- c("area_code", "geography", "scenario", "year", "age", "sex")
+join_cols_base <- c("area_code", "geography", "scenario", "age", "sex")
 
 
-sel_scenario <- "adjusted"
-
+## 1. read in and tidy datasets needed
 estimates_parquet <- open_dataset(paste0("output_data/estimates_backseries_", max_year))
 
 population <- estimates_parquet %>%
@@ -40,7 +36,6 @@ population <- estimates_parquet %>%
   ) %>%
   collect() %>%
   select(-component)
-
 
 births <- estimates_parquet %>%
   filter(
@@ -62,7 +57,6 @@ outflow <- estimates_parquet %>%
   rename(outflow = value) %>%
   select(-component)
 
-
 inflow <- estimates_parquet %>%
   filter(
     scenario == sel_scenario,
@@ -83,7 +77,7 @@ inflow <- filter(inflow, between(year, year_min, year_max)) %>%
   split(., ~ area_code)
 
 
-# standard_population_at_risk uses population and births but doesn't include inflows
+## 2. get standard population at risk - standard_population_at_risk uses population and births but doesn't include inflows
 standard_population_at_risk <- bind_rows(
   population %>%
     mutate(age = case_when(
@@ -101,6 +95,7 @@ standard_population_at_risk <- bind_rows(
 rm(population, births)
 
 
+## 3. set up and carry out fitting of modelled flows
 
 modelled_flows <- vector(mode = "list", length = length(inflow))
 names(modelled_flows) <- names(inflow)
@@ -109,7 +104,7 @@ k <- 0
 
 message(paste0("Fitting rates for ", length(inflow), " areas."))
 
-for(acode in names(modelled_flows)) {
+for(acode in names(modelled_flows)) { # to do - fix this process, get rid of multiple nested functions, hardcoded variable names, functions without all required inputs declared, functions that need objects to have been created elsewhere in global environment, etc etc etc.......
   
   modelled_flows[[acode]] <- model_flows_single_area(standard_population_at_risk[[acode]], 
                                                      inflow[[acode]],
@@ -141,9 +136,10 @@ output_population_at_risk <- add_inflows_to_population_at_risk(
   output_inflows
 ) 
 
-#------------------CREATE AVERAGE RATES---------------------------
-#-------Outflows
 
+## 4. create average rates, and save results
+
+  ### 4.1. outflows
 for(years_to_average in c_years_to_average) {
   
   out_mig_rates <- output_outflows %>%
@@ -167,16 +163,14 @@ for(years_to_average in c_years_to_average) {
     mutate(scenario = paste0(years_to_average,"_years"),
            component = "out_migration_rates",
            year = year_max + 1) %>%
-    arrange(gss_code, area_code, sex, age) %>%
+    arrange(area_code, sex, age) %>%
     write_dataset(path = paste0("output_data/input_rates_", max_year),
                   format = "parquet", 
                   partitioning = c("geography", "component", "scenario", "year"))
   
 }
-paste0("output_data/input_rates_", max_year)
 
-#----------Inflows
-
+  ### 4.2. inflows
 for(years_to_average in c_years_to_average) {
   
   in_mig_flows <- output_inflows %>%
@@ -186,9 +180,10 @@ for(years_to_average in c_years_to_average) {
     mutate(scenario = paste0(years_to_average,"_years"),
            component = "in_migration_rates",
            year = year_max + 1) %>%
-    arrange(gss_code, area_code, sex, age) %>%
+    arrange(area_code, sex, age) %>%
     write_dataset(path = paste0("output_data/input_rates_", max_year), # again rename and automate, after testing and reviewing
                   format = "parquet", 
                   partitioning = c("geography", "component", "scenario", "year"))
   
 }
+

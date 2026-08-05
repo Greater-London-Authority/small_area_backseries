@@ -22,4 +22,3 @@ get_base_out_mig_rates <- function(outflows, pop_at_risk, base_years) {
   return(out_df)
 }
 
-

@@ -1,4 +1,3 @@
-## specific function, used within very specific scheme of functions
 
 add_inflows_to_population_at_risk <- function(std_pop_at_risk, inflows) {
   
