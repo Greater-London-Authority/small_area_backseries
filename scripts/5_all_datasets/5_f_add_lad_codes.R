@@ -38,6 +38,7 @@ rates <- rates_parquet %>%
 
 
 lookup <- fread("lookups/msoa21_lad23.csv")
+lookup <- data.table(lookup)
 
 colnames(lookup) <- tolower(colnames(lookup))
 
@@ -67,3 +68,4 @@ write_dataset(dataset = rates,
               path = paste0("output_data/input_rates_", max_year), # just overwriting the existing version - the exact same output aside from the new lad codes
               format = "parquet", 
               partitioning = c("geography", "component", "scenario", "year"))
+

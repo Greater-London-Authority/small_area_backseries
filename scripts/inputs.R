@@ -7,9 +7,8 @@ min_year <- 2011
 ## geography codes and any related objects
 lad_version <- 2023 # the version of the lad boundaries that we want to recode to. Important only for the deaths ipf process at the moment. (that's gone now, so this is no longer needed)
 
-geography_name <- "msoa21" ## for the parquet and migration rates adjustment scripts at the end 
-scenario_name <- "adjusted" ## same as above
-sel_scenario <- "adjusted" ## same as above
+scenario_name <- "adjusted" ## for the parquet and migration rates adjustment scripts at the end 
+sel_scenario <- "adjusted" ## for the parquet and migration rates adjustment scripts at the end 
 
 
 ## links to external datasets
@@ -41,4 +40,5 @@ log_lsoa21_lookup_best_fit <- TRUE # tells it whether to add a new artificial we
 
 dest_geog_colname <- "msoa21cd" # all lookups need to have this as the column name of the destination geography
 
+geography_name <- "msoa21" ## for the parquet and migration rates adjustment scripts at the end 
 
