@@ -15,8 +15,9 @@ lapply(
 
 source("scripts/inputs.R")
 
-
 ## 1. reading files and lookups, fixing up data, writing out as pq
+
+lookup_area_gss_code <- read.csv(lookup_area_gss_code_path)
 
 full_series_filepath <- paste0("output_data/revised_backseries_", dest_geog_colname, "_", min_year + 1, "_", max_year, ".rds")
 
@@ -43,6 +44,7 @@ components <- full_series %>%
   arrange(area_code, year, component, sex, age)
 
 bind_rows(population, components) %>%
+  left_join(lookup_area_gss_code, by = "area_code") |>
   write_dataset(path = paste0("output_data/estimates_backseries_", max_year),
                 format = "parquet", 
                 partitioning = c("geography", "component", "scenario", "year"))
