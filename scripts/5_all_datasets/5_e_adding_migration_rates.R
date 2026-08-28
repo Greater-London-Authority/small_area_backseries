@@ -16,7 +16,7 @@ source("scripts/inputs.R")
 
 
 rate_max <- 0.8
-c_years_to_average <- c(5, 10, 13)
+c_years_to_average <- c(3, 5, 8, 10, 13)
 age_max <- 90
 
 base_years_for_out_rate_prior <- c(2012, 2013, 2014)
@@ -24,6 +24,7 @@ base_years_for_out_rate_prior <- c(2012, 2013, 2014)
 join_cols <- c("area_code", "geography", "scenario", "year", "age", "sex")
 join_cols_base <- c("area_code", "geography", "scenario", "age", "sex")
 
+lookup_area_gss_code <- read.csv(lookup_area_gss_code_path)
 
 ## 1. read in and tidy datasets needed
 estimates_parquet <- open_dataset(paste0("output_data/estimates_backseries_", max_year))
@@ -164,6 +165,7 @@ for(years_to_average in c_years_to_average) {
            component = "out_migration_rates",
            year = year_max + 1) %>%
     arrange(area_code, sex, age) %>%
+    left_join(lookup_area_gss_code, by = "area_code") |>
     write_dataset(path = paste0("output_data/input_rates_", max_year),
                   format = "parquet", 
                   partitioning = c("geography", "component", "scenario", "year"))
@@ -181,6 +183,7 @@ for(years_to_average in c_years_to_average) {
            component = "in_migration_rates",
            year = year_max + 1) %>%
     arrange(area_code, sex, age) %>%
+    left_join(lookup_area_gss_code, by = "area_code") |>
     write_dataset(path = paste0("output_data/input_rates_", max_year), # again rename and automate, after testing and reviewing
                   format = "parquet", 
                   partitioning = c("geography", "component", "scenario", "year"))

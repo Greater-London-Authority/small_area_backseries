@@ -30,28 +30,28 @@ lsoa11_population_path <- "https://data.london.gov.uk/download/ex9jd/feh/populat
 ## NB. the lookups from oa21 and lsoa21, to whatever the desired geography is, can either be weighted or not. The code will work with each of these cases slightly differently, at the start of scripts 4_a and 5_c. So it's very important to set the logical arguments below correctly - TRUE if the 2021 lookup is best-fit or exact-fit to the desired end geography, FALSE if it is a weighted lookup to the desired end geography. 
 
 
-# lsoa11_lookup_path <- "lookups/lsoa11_msoa21_weighted_extended.rds"
+lsoa11_lookup_path <- "lookups/lsoa11_msoa21_weighted_extended.rds"
+
+oa21_lookup_path <- "lookups/2021_oa_msoa.csv"
+log_oa21_lookup_best_fit <- TRUE # tells it whether to add a new artificial weight of 1 to all cells. If the input lookup here is best-fit or exact-fit, then this should be TRUE. If the input lookup already has a weight column, the add FALSE.
+
+lsoa21_lookup_path <- "lookups/2021_lsoa_msoa.csv"
+log_lsoa21_lookup_best_fit <- TRUE # tells it whether to add a new artificial weight of 1 to all cells. If the input lookup here is best-fit or exact-fit, then this should be TRUE. If the input lookup already has a weight column, the add FALSE.
+
+dest_geog_colname <- "msoa21cd" # all lookups need to have this as the column name of the destination geography
+
+geography_name <- "msoa21" ## for the parquet and migration rates adjustment scripts at the end
+
+# lsoa11_lookup_path <- "lookups/lsoa11_ward22_weighted_extended.rds"
 # 
-# oa21_lookup_path <- "lookups/2021_oa_msoa.csv"
+# oa21_lookup_path <- "lookups/oa21_ward22_lsoa_best_fit.csv" # "lookups/oa21_ward22_lsoa_best_fit.csv" is different to the usual OA to ward best fit and used here for consistency with other model inputs
 # log_oa21_lookup_best_fit <- TRUE # tells it whether to add a new artificial weight of 1 to all cells. If the input lookup here is best-fit or exact-fit, then this should be TRUE. If the input lookup already has a weight column, the add FALSE. 
 # 
-# lsoa21_lookup_path <- "lookups/2021_lsoa_msoa.csv"
+# lsoa21_lookup_path <- "lookups/lsoa21_ward22_best_fit.csv"
 # log_lsoa21_lookup_best_fit <- TRUE # tells it whether to add a new artificial weight of 1 to all cells. If the input lookup here is best-fit or exact-fit, then this should be TRUE. If the input lookup already has a weight column, the add FALSE. 
 # 
-# dest_geog_colname <- "msoa21cd" # all lookups need to have this as the column name of the destination geography
+# dest_geog_colname <- "ward22cd" # all lookups need to have this as the column name of the destination geography
 # 
-# geography_name <- "msoa21" ## for the parquet and migration rates adjustment scripts at the end 
-
-lsoa11_lookup_path <- "lookups/lsoa11_ward22_weighted_extended.rds"
-
-oa21_lookup_path <- "lookups/oa21_ward22_lsoa_best_fit.csv" # "lookups/oa21_ward22_lsoa_best_fit.csv" is different to the usual OA to ward best fit and used here for consistency with other model inputs
-log_oa21_lookup_best_fit <- TRUE # tells it whether to add a new artificial weight of 1 to all cells. If the input lookup here is best-fit or exact-fit, then this should be TRUE. If the input lookup already has a weight column, the add FALSE. 
-
-lsoa21_lookup_path <- "lookups/lsoa21_ward22_best_fit.csv"
-log_lsoa21_lookup_best_fit <- TRUE # tells it whether to add a new artificial weight of 1 to all cells. If the input lookup here is best-fit or exact-fit, then this should be TRUE. If the input lookup already has a weight column, the add FALSE. 
-
-dest_geog_colname <- "ward22cd" # all lookups need to have this as the column name of the destination geography
-
-geography_name <- "ward22" ## for the parquet and migration rates adjustment scripts at the end 
+# geography_name <- "ward22" ## for the parquet and migration rates adjustment scripts at the end 
 
 lookup_area_gss_code_path <- "lookups/lookup_area_gss_code.csv" ## to add the gss_code to the output. "lookups/lookup_area_gss_code.csv" includes both msoa21 and ward22

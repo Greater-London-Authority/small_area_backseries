@@ -19,7 +19,7 @@ lapply(
 
 ## 1. reading in datasets and lookups
 
-la_level_backseries <- data.table(readRDS("input_data/raw/adjusted_rebuilt_mye_backseries.rds")) # for now I've just dropped this right into the raw folder, from the repo that created the la-level revised backseries with adjusted young population. Once that process is finalised and it's on the datastore, change this so that it reads it in directly. The link is already set in the inputs script, in the object latest_gla_mye_url. Although the ability to read it in may not have survived the various changes to the datastore.     
+la_level_backseries <- data.table(readRDS("input_data/raw/adjusted_population_lad.rds")) # for now I've just dropped this right into the raw folder, from the repo that created the la-level revised backseries with adjusted young population. Once that process is finalised and it's on the datastore, change this so that it reads it in directly. The link is already set in the inputs script, in the object latest_gla_mye_url. Although the ability to read it in may not have survived the various changes to the datastore.     
 gsscoder::get_gss_year(la_level_backseries)
 
 lsoa_population <- readRDS(paste0("input_data/intermediate/mid_year_rebased_", min_year, max_year, "_lsoa21.rds"))
